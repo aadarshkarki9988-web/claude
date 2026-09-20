@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact &amp; Booking | Royal Inn | Tansen, Palpa</title>
+  <meta name="description" content="Contact Royal Inn — Tundikhel Road, Tansen 32500, Palpa. Call, WhatsApp or email to book a table. Open daily 12:00 PM – 10:00 PM." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="announce" id="announce" role="region" aria-label="Announcement">
+    <span class="announce__label">Now welcoming guests</span>
+    <span class="announce__msg">A garden restaurant &amp; lounge in Tansen, Palpa</span>
+    <a class="cta" href="/contact/">Book a Table</a>
+    <button class="announce__close" id="announceClose" aria-label="Dismiss announcement">&times;</button>
+  </div>
+
+  <header class="header" id="header">
+    <div class="header__inner">
+      <div class="header__left">
+        <a class="header__book" href="/contact/">Book a Table</a>
+        <a class="header__phone" href="tel:+97775522780">+977 75-522780</a>
+      </div>
+      <div class="header__center">
+        <a class="logo" href="/" aria-label="Royal Inn home"><img class="logo-img" src="/assets/brand/logo-mark.png" alt="Royal Inn — Eat, Drink and Chill" /></a>
+      </div>
+      <div class="header__right">
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="navOverlay"><span>Menu</span><span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-overlay" id="navOverlay" aria-label="Main navigation">
+    <div class="nav-overlay__bg" aria-hidden="true"></div>
+    <button class="nav-overlay__close" id="navClose"><span>Close</span> &times;</button>
+    <img class="nav-overlay__logo" src="/assets/brand/logo-mark.png" alt="Royal Inn" />
+    <ul class="nav-overlay__primary">
+      <li><a href="/">Home</a></li>
+      <li><a href="/gallery/">Gallery</a></li>
+      <li><a href="/menu/">Menu</a></li>
+      <li><a href="/about/">About</a></li>
+      <li><a href="/faq/">FAQ</a></li>
+      <li><a href="/contact/">Contact</a></li>
+    </ul>
+    <ul class="nav-overlay__secondary">
+      <li><a href="/contact/">Book a Table</a></li>
+      <li><a href="tel:+97775522780">+977 75-522780</a></li>
+    </ul>
+  </nav>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="page-hero__bg ph"><img src="/assets/img/ri-arch-3.jpg" alt="Cushioned seating under the Royal Inn canopy" /></div>
+      <div class="page-hero__inner animate-fade">
+        <p class="eyebrow">Come Say Hello</p>
+        <h1>Contact</h1>
+      </div>
+    </section>
+
+    <div class="page-section">
+      <div class="container">
+        <div class="contact-grid">
+          <div class="contact-info animate-fade">
+            <div class="block">
+              <div class="label">Find Us</div>
+              <div class="value">Tundikhel Road<br />Tansen 32500, Palpa, Nepal<br />
+                <a href="https://www.google.com/maps/dir/?api=1&destination=Royal+Inn+Tansen+Palpa+Nepal" target="_blank" rel="noopener">Get Directions</a></div>
+            </div>
+            <div class="block">
+              <div class="label">Call</div>
+              <div class="value"><a href="tel:+97775522780">+977 75-522780</a><br /><a href="tel:+9779847003162">+977 984-7003162</a></div>
+            </div>
+            <div class="block">
+              <div class="label">WhatsApp</div>
+              <div class="value"><a href="https://wa.me/9779847003162" target="_blank" rel="noopener">Message us on WhatsApp</a></div>
+            </div>
+            <div class="block">
+              <div class="label">Email</div>
+              <div class="value"><a href="mailto:inn.royal@yahoo.com">inn.royal@yahoo.com</a></div>
+            </div>
+            <div class="block">
+              <div class="label">Hours</div>
+              <div class="value">Open daily · 12:00 PM – 10:00 PM</div>
+            </div>
+            <div class="block">
+              <div class="label">Follow</div>
+              <div class="value"><a href="https://www.facebook.com/inn.royal/" target="_blank" rel="noopener">Facebook</a> · <a href="https://www.tiktok.com/@royalinn_restaurant" target="_blank" rel="noopener">TikTok</a></div>
+            </div>
+          </div>
+
+          <div class="contact-form animate-fade">
+            <h2 class="h-display" style="margin-bottom:26px">Book or Enquire</h2>
+            <form id="contactForm" aria-label="Contact Royal Inn">
+              <div class="field"><label for="cname">Name</label><input type="text" id="cname" name="name" autocomplete="name" /></div>
+              <div class="field"><label for="cphone">Phone</label><input type="tel" id="cphone" name="phone" autocomplete="tel" /></div>
+              <div class="field"><label for="ctype">Enquiry</label>
+                <select id="ctype" name="type">
+                  <option>Reserve a table</option><option>Event or celebration</option><option>General enquiry</option>
+                </select>
+              </div>
+              <div class="field"><label for="cdates">Dates / Guests</label><input type="text" id="cdates" name="dates" placeholder="e.g. 2 guests, 12–14 Oct" /></div>
+              <div class="field"><label for="cmsg">Message</label><textarea id="cmsg" name="message" placeholder="Tell us what you need and we'll confirm."></textarea></div>
+              <button type="submit" class="cta">Send via WhatsApp</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" id="footer">
+    <div class="footer__bg ph" style="background-image:url('/assets/img/footer-bg.jpg')" aria-hidden="true"></div>
+    <div class="container">
+      <div class="footer__top">
+        <div>
+          <h3>Stay in Touch</h3>
+          <div class="footer__socials">
+            <a href="https://www.facebook.com/inn.royal/" target="_blank" rel="noopener">Facebook <span class="sr-only">(opens in new window)</span></a>
+            <a href="https://www.tiktok.com/@royalinn_restaurant" target="_blank" rel="noopener">TikTok <span class="sr-only">(opens in new window)</span></a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram <span class="sr-only">(opens in new window)</span></a>
+          </div>
+        </div>
+        <div>
+          <form class="nl" aria-label="Newsletter sign-up">
+            <div class="nl__row"><input type="text" placeholder="First Name" aria-label="First Name" /><input type="text" placeholder="Last Name" aria-label="Last Name" /></div>
+            <input type="email" placeholder="Email Address" aria-label="Email Address" />
+            <label class="nl__check"><input type="checkbox" /> <span>Keep me posted on new plates, events and evenings at Royal Inn.</span></label>
+            <button type="submit" class="cta cta--light">Submit</button>
+          </form>
+        </div>
+      </div>
+      <nav class="footer__nav" aria-label="Footer"><a href="/gallery/">Gallery</a><a href="/menu/">Menu</a><a href="/about/">About</a><a href="/faq/">FAQ</a><a href="/contact/">Contact</a></nav>
+      <div class="footer__brand">
+        <a href="/" aria-label="Royal Inn home"><img class="footer__logo" src="/assets/brand/logo-mark.png" alt="Royal Inn — Eat, Drink and Chill" /></a>
+        <address class="footer__address">ROYAL INN<br />TUNDIKHEL ROAD<br />TANSEN 32500, PALPA<br />+977 75-522780<br />+977 984-7003162<br />INN.ROYAL@YAHOO.COM</address>
+      </div>
+      <div class="footer__legal"><span>Royal Inn · 2026 · Tansen, Palpa · All rights reserved.</span><ul><li></li><li><a href="/gallery/">Gallery</a></li><li><a href="/contact/">Contact</a></li></ul></div>
+    </div>
+  </footer>
+
+  <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}</style>
+  <script src="/script.js"></script>
+  <script>
+    var cf = document.getElementById('contactForm');
+    if (cf) cf.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name=(document.getElementById('cname').value||'').trim();
+      var phone=(document.getElementById('cphone').value||'').trim();
+      var type=document.getElementById('ctype').value;
+      var dates=(document.getElementById('cdates').value||'').trim();
+      var msg=(document.getElementById('cmsg').value||'').trim();
+      var text='Hi Royal Inn! '+(name?"I'm "+name+'. ':'')+'Enquiry: '+type+'. '+(dates?dates+'. ':'')+(msg?msg+' ':'')+(phone?'('+phone+')':'');
+      window.open('https://wa.me/9779847003162?text='+encodeURIComponent(text),'_blank','noopener');
+    });
+  </script>
+</body>
+</html>
