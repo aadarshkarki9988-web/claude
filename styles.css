@@ -1369,3 +1369,44 @@ body.announce-dismissed .menu-nav { top: var(--header-h); }
   .reel-trio { grid-template-columns: repeat(3, 1fr); }
   .gallery-masonry { columns: 2; }
 }
+
+/* =========================================================================
+   MOBILE TYPOGRAPHY & FINISHING — consistent scale, nothing cut off
+   ========================================================================= */
+@media (max-width: 700px) {
+  /* One consistent, readable type scale (was 12px→34px, too wide a jump) */
+  .h-display { font-size: 30px; line-height: 1.12; letter-spacing: .3px; }
+  .body-copy { font-size: 15.5px; line-height: 1.66; }
+  .section-head .body-copy,
+  .page-intro .body-copy { font-size: 14.5px; }
+  .eyebrow { font-size: 11px; letter-spacing: 1.8px; margin-bottom: 16px; }
+  .hero__tagline { font-size: 23px; }
+  .hero__intro { font-size: 12.5px; letter-spacing: 1px; line-height: 1.9; }
+  .statement__line { font-size: 30px; line-height: 1.16; }
+  .statement__sub { font-size: 12px; letter-spacing: 1.4px; line-height: 1.8; }
+  .faq__q { font-size: 17px; }
+  .duo-card figcaption { font-size: 18px; }
+  .menu-section__blurb, .menu-note { font-size: 13px; }
+  .reel-cap, .reel-trio .reel-cap { font-size: 11px; }
+
+  /* Never let a heading clip on a narrow screen */
+  .h-display, .statement__line, .hero__tagline, .cta-band .h-display,
+  .image-band__cap .h-display, .page-hero h1 { overflow-wrap: break-word; word-break: normal; }
+
+  /* Final CTA — trim the oversized empty band; keep text fully visible */
+  .cta-band { padding: 64px 0; }
+  .cta-band .h-display { font-size: 30px; margin-bottom: 24px; }
+  .cta-band__ctas { gap: 22px; }
+
+  /* Footer — comfortable, nothing cramped, legal stacks cleanly */
+  .footer { padding-bottom: 44px; }
+  .footer__top { gap: 30px; }
+  .footer__address { font-size: 12px; line-height: 2.1; letter-spacing: 1px; }
+  .footer__legal { flex-direction: column; align-items: flex-start; gap: 12px; font-size: 11px; }
+  .footer__legal ul { display: flex; gap: 18px; }
+
+  /* Newsletter fields — make them clearly visible on the dark footer */
+  .nl input { border: 1px solid rgba(240,238,225,.28); background: rgba(240,238,225,.05); padding: 12px 14px; border-radius: 4px; color: var(--cream); }
+  .nl input::placeholder { color: rgba(240,238,225,.6); }
+  .nl__row { gap: 12px; }
+}

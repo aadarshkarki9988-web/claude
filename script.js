@@ -138,8 +138,9 @@
     var vio = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) loadAndPlay(entry.target);
+        else if (entry.target.dataset.loaded) { try { entry.target.pause(); } catch (e) {} }
       });
-    }, { rootMargin: '600px 0px', threshold: 0.01 });
+    }, { rootMargin: '250px 0px', threshold: 0.01 });
     lazyVideos.forEach(function (v) { vio.observe(v); });
 
     /* Fallback: some browsers block silent autoplay until a user gesture.
