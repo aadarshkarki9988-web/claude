@@ -1329,3 +1329,43 @@ body.announce-dismissed .menu-nav { top: var(--header-h); }
   .hero__scroll { display: none; }
   body.announce-dismissed .hero--home { padding-top: var(--header-h); }
 }
+
+/* =========================================================================
+   MOBILE EXPERIENCE PASS — full videos, swipeable reels, tidy photo grids
+   ========================================================================= */
+@media (max-width: 700px) {
+  /* Lower drone video ("Tansen From Above") — show the FULL landscape clip */
+  .cinematic { height: auto; min-height: 0; display: block; background: var(--olive); }
+  .cinematic video { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+  .cinematic__overlay { display: none; }
+  .cinematic .container { position: relative; z-index: 2; padding: 24px 20px 30px; }
+
+  /* Reel trio → swipeable carousel (peek the next one) instead of a tall stack */
+  .reel-trio {
+    display: flex; grid-template-columns: none; max-width: none;
+    overflow-x: auto; gap: 14px; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding: 0 var(--gutter) 6px;
+  }
+  .reel-trio::-webkit-scrollbar { display: none; }
+  .reel-trio .reel-item { flex: 0 0 66%; scroll-snap-align: center; display: block; }
+
+  /* Reels wall — a touch more peek so it clearly invites swiping */
+  .reel-five .reel-frame { flex-basis: 80%; }
+
+  /* Gallery preview → clean 2-up grid (was a single tall column) */
+  .gallery-masonry { columns: 2; column-gap: 12px; }
+  .gallery-masonry > * { margin-bottom: 12px; }
+
+  /* The food pair — a hair more breathing room when stacked */
+  .media-duo { gap: 22px; }
+
+  /* Section headings sit a little tighter to their content on phones */
+  .section-head { margin-bottom: 40px; }
+}
+
+/* Tablet (two-column comfort, not desktop-dense) */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .reel-trio { grid-template-columns: repeat(3, 1fr); }
+  .gallery-masonry { columns: 2; }
+}
