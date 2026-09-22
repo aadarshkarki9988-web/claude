@@ -125,15 +125,18 @@
   if (lazyVideos.length && 'IntersectionObserver' in window) {
     /* Load a video's source (once) and try to play it. Never pauses on exit,
        so once a reel starts it keeps looping — no reel is left frozen. */
+    function tryPlay(v) { v.muted = true; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
     function loadAndPlay(v) {
       if (!v.dataset.loaded) {
         var s = document.createElement('source');
         s.src = v.getAttribute('data-src'); s.type = 'video/mp4';
         v.appendChild(s); v.load(); v.dataset.loaded = '1';
         var ld = v.parentNode.querySelector('.reel-load'); if (ld) ld.remove();
+        /* retry play the moment the clip is actually ready (fixes silent early-play fails on phones) */
+        v.addEventListener('canplay', function () { tryPlay(v); });
+        v.addEventListener('loadeddata', function () { tryPlay(v); });
       }
-      v.muted = true;
-      var p = v.play(); if (p && p.catch) p.catch(function () {});
+      tryPlay(v);
     }
     var vio = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
