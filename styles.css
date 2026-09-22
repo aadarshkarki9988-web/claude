@@ -1410,3 +1410,46 @@ body.announce-dismissed .menu-nav { top: var(--header-h); }
   .nl input::placeholder { color: rgba(240,238,225,.6); }
   .nl__row { gap: 12px; }
 }
+
+/* =========================================================================
+   MOBILE — "The Spaces" as a swipeable carousel + covered-text safeguards
+   ========================================================================= */
+@media (max-width: 700px) {
+  .rooms-grid {
+    display: flex; grid-template-columns: none; max-width: none;
+    overflow-x: auto; gap: 16px; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding: 4px var(--gutter) 8px;
+  }
+  .rooms-grid::-webkit-scrollbar { display: none; }
+  .rooms-grid .room-card { flex: 0 0 80%; scroll-snap-align: center; }
+  .room-card h3 { font-size: 21px; }
+  .room-card .body-copy { font-size: 14px; }
+
+  /* Captions that sit OVER media — strengthen the veil so text is never lost */
+  .image-band::after { background: linear-gradient(to top, rgba(20,16,8,.78) 0%, rgba(20,16,8,.15) 60%, rgba(20,16,8,.1) 100%); }
+  .image-band__cap { padding-bottom: 40px; }
+  .image-band__cap .h-display { font-size: 30px; }
+}
+
+/* =========================================================================
+   POLISH — anchor offsets (no text hidden under fixed bars) + soft media
+   ========================================================================= */
+/* When jumping to any section, keep its heading clear of the fixed header */
+section[id], .menu-section { scroll-margin-top: calc(var(--ann-h) + var(--header-h) + 16px); }
+.menu-section { scroll-margin-top: calc(var(--ann-h) + var(--header-h) + 90px); }
+
+/* Softer, more modern reel frames (kept away from the arch shape) */
+.reel-trio .reel-frame,
+.reel-five .reel-frame,
+.media-duo .duo-card__media { border-radius: 10px; }
+
+@media (max-width: 700px) {
+  /* Give stacked sections a touch more air so nothing feels cramped/cut */
+  .home .page-section .section-head { padding: 0 4px; }
+  .feature__text { padding: 40px 22px 8px; }
+  .feature__text .body-copy { max-width: none; }
+  /* Signature/Bar feature media a sensible height on phones */
+  .feature__media { min-height: 300px; }
+  .feature__media video, .feature__media img { object-position: center; }
+}
