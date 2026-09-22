@@ -1300,3 +1300,32 @@ body.announce-dismissed .menu-nav { top: var(--header-h); }
   .header__inner { padding: 0 16px; }
   .logo-img { max-height: 44px; width: auto; }
 }
+
+/* =========================================================================
+   MOBILE HERO — show the full horizontal drone video (no crop), text below
+   ========================================================================= */
+@media (max-width: 700px) {
+  .hero--home {
+    min-height: 0; height: auto; display: block;
+    background: var(--olive);
+    padding-top: calc(var(--ann-h) + var(--header-h));  /* clear the fixed bars */
+    align-items: stretch; text-align: center;
+  }
+  .hero--home .hero__media {
+    position: relative; inset: auto;
+    width: 100%; aspect-ratio: 16 / 9;   /* full landscape video, nothing cut off */
+  }
+  .hero--home .hero__media video,
+  .hero--home .hero__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero--home .hero__media::after { display: none; }
+  .hero--home .hero__inner {
+    position: relative; z-index: 2;
+    padding: 30px 22px 40px; margin: 0 auto;
+  }
+  .hero__logo { width: min(220px, 60vw); filter: none; margin-bottom: 16px; }
+  .hero__tagline { font-size: 24px; margin-bottom: 16px; }
+  .hero__intro { font-size: 12px; line-height: 1.9; }
+  .hero__ctas { margin-top: 26px; }
+  .hero__scroll { display: none; }
+  body.announce-dismissed .hero--home { padding-top: var(--header-h); }
+}
