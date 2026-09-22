@@ -1283,3 +1283,20 @@ body.announce-dismissed .menu-nav { top: var(--header-h); }
   width: 100%; height: auto; display: block;
   filter: drop-shadow(0 34px 46px rgba(38,25,13,.4));
 }
+
+/* =========================================================================
+   MOBILE POLISH — clean header + announcement bar on phones
+   ========================================================================= */
+@media (max-width: 700px) {
+  /* Announcement bar: one clean short line instead of overflowing text */
+  .announce { gap: 0; padding: 0 40px; justify-content: center; }
+  .announce__msg,
+  .announce .cta { display: none; }
+  .announce__label { font-size: 11px; letter-spacing: 1.5px; white-space: nowrap; opacity: 1; }
+}
+@media (max-width: 600px) {
+  /* Header: logo + menu only (drop the wrapping "Book a Table" text) */
+  .header__book { display: none; }
+  .header__inner { padding: 0 16px; }
+  .logo-img { max-height: 44px; width: auto; }
+}
