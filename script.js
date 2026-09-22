@@ -143,21 +143,24 @@
     lazyVideos.forEach(function (v) { vio.observe(v); });
 
     /* Fallback: some browsers block silent autoplay until a user gesture.
-       On the first scroll / tap / move, load AND play EVERY reel (including the
-       ones parked off-screen in the horizontal wall), then keep them running. */
+       On the first scroll / tap, nudge only the videos CURRENTLY on screen
+       (never all of them at once — that would swamp a phone's data). The
+       observer above still loads each remaining reel as it scrolls into view. */
     var kicked = false;
     function kickVideos() {
       if (kicked) return; kicked = true;
-      lazyVideos.forEach(loadAndPlay);
+      var vh = window.innerHeight || 0;
+      lazyVideos.forEach(function (v) {
+        var r = v.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < vh) loadAndPlay(v);
+      });
       window.removeEventListener('scroll', kickVideos);
       window.removeEventListener('touchstart', kickVideos);
       window.removeEventListener('pointerdown', kickVideos);
-      window.removeEventListener('mousemove', kickVideos);
     }
     window.addEventListener('scroll', kickVideos, { passive: true, once: true });
     window.addEventListener('touchstart', kickVideos, { passive: true, once: true });
     window.addEventListener('pointerdown', kickVideos, { passive: true, once: true });
-    window.addEventListener('mousemove', kickVideos, { passive: true, once: true });
   } else {
     lazyVideos.forEach(function (v) {
       var s = document.createElement('source'); s.src = v.getAttribute('data-src'); s.type = 'video/mp4';
