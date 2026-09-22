@@ -1453,3 +1453,20 @@ section[id], .menu-section { scroll-margin-top: calc(var(--ann-h) + var(--header
   .feature__media { min-height: 300px; }
   .feature__media video, .feature__media img { object-position: center; }
 }
+
+/* =========================================================================
+   MOBILE SAFETY — headings never clip, footer never overflows
+   ========================================================================= */
+@media (max-width: 700px) {
+  /* Long headings shrink to fit narrow phones (was a fixed 30px that could clip) */
+  .h-display { font-size: clamp(22px, 6.8vw, 30px); }
+  .section-head { padding-left: 16px; padding-right: 16px; }
+  .cta-band .h-display, .image-band__cap .h-display { font-size: clamp(24px, 7.4vw, 32px); }
+
+  /* Footer newsletter — stack name fields, keep everything inside the screen */
+  .nl__row { flex-direction: column; }
+  .nl__row input { width: 100%; }
+  .nl__check { align-items: flex-start; }
+  .nl__check span { font-size: 12px; line-height: 1.5; }
+  .footer__nav { flex-wrap: wrap; gap: 16px 22px; }
+}
