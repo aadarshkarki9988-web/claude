@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Royal Inn — Gallery Admin</title>
+<style>
+  :root { --bg:#0e0d0b; --panel:#171512; --line:#2b261f; --gold:#b08d57; --text:#e9e3d8; --muted:#9c9388; --danger:#c0503f; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:Georgia, 'Times New Roman', serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:32px 20px 80px; }
+  h1 { font-weight:500; letter-spacing:.5px; font-size:26px; }
+  h1 small { display:block; color:var(--muted); font-size:13px; letter-spacing:2px; margin-top:4px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:22px; margin-top:22px; }
+  label { display:block; color:var(--muted); font-size:12px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; }
+  input[type=password] { width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:#201d1a; color:var(--text); font-size:15px; }
+  input[type=password]:focus { outline:none; border-color:var(--gold); }
+  button { cursor:pointer; border:none; border-radius:8px; padding:12px 20px; font-size:14px; background:var(--gold); color:#17130d; font-weight:700; letter-spacing:.5px; }
+  button.ghost { background:transparent; color:var(--danger); border:1px solid var(--danger); padding:6px 10px; font-size:12px; font-weight:500; }
+  button.secondary { background:#2b261f; color:var(--text); border:1px solid var(--line); }
+  .err { color:var(--danger); font-size:13px; min-height:18px; margin-top:10px; }
+  .drop { border:2px dashed var(--line); border-radius:10px; padding:40px 20px; text-align:center; color:var(--muted); transition:.15s; }
+  .drop.drag { border-color:var(--gold); color:var(--gold); background:#1d1a16; }
+  .drop b { color:var(--text); }
+  .status { margin-top:14px; font-size:13px; color:var(--muted); white-space:pre-line; }
+  .badge { display:inline-block; font-size:11px; letter-spacing:1px; padding:3px 8px; border-radius:20px; border:1px solid var(--line); color:var(--muted); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:16px; }
+  .item { border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#12100d; }
+  .item .thumb { aspect-ratio:4/3; background:#000; display:block; }
+  .item .thumb img, .item .thumb video { width:100%; height:100%; object-fit:cover; display:block; }
+  .item .meta { padding:10px 12px; font-size:12px; color:var(--muted); }
+  .item .meta .name { color:var(--text); word-break:break-all; }
+  .item .row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+  .muted { color:var(--muted); }
+  .center { text-align:center; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Royal Inn <small>Gallery Admin — add photos &amp; videos</small></h1>
+
+  <section class="card" id="loginCard">
+    <label for="pwd">Password</label>
+    <input type="password" id="pwd" placeholder="Enter admin password" autocomplete="current-password" />
+    <div style="margin-top:14px"><button id="loginBtn">Log in</button></div>
+    <div class="err" id="loginErr"></div>
+  </section>
+
+  <section class="card" id="panel" hidden>
+    <div id="drop" class="drop">
+      <p style="margin:0">
+        <b>Drag photos or videos here</b><br />
+        or <span class="muted">click to browse — multiple files supported</span>
+      </p>
+      <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" multiple hidden />
+    </div>
+    <div class="status" id="status"></div>
+    <hr style="border-color:var(--line); margin:20px 0 0" />
+    <p class="muted" style="font-size:12px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:0">
+      Saved media <span class="badge" id="count"></span>
+    </p>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var loginCard = document.getElementById('loginCard');
+  var pwdInput = document.getElementById('pwd');
+  var loginBtn = document.getElementById('loginBtn');
+  var loginErr = document.getElementById('loginErr');
+  var panel = document.getElementById('panel');
+  var drop = document.getElementById('drop');
+  var fileInput = document.getElementById('fileInput');
+  var statusEl = document.getElementById('status');
+  var grid = document.getElementById('grid');
+  var countEl = document.getElementById('count');
+
+  function fmtBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+  function fmtDate(s) {
+    if (!s) return '';
+    return String(s).replace('T', ' ').slice(0, 16) + ' UTC';
+  }
+
+  function req(url, opts) {
+    return fetch(url, opts).then(function (r) {
+      if (r.status === 401) throw { auth: true };
+      if (!r.ok) throw { status: r.status };
+      return r;
+    });
+  }
+
+  function showLogin() { loginCard.hidden = false; panel.hidden = true; }
+  function showPanel() { loginCard.hidden = true; panel.hidden = false; }
+
+  loginBtn.addEventListener('click', function () {
+    var pwd = pwdInput.value;
+    if (!pwd) return;
+    loginErr.textContent = '';
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    }).then(function (r) {
+      if (r.ok) { pwdInput.value = ''; load(); }
+      else { loginErr.textContent = 'Wrong password.'; }
+    }).catch(function () { loginErr.textContent = 'Login failed — try again.'; });
+  });
+  pwdInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') loginBtn.click(); });
+
+  function load() {
+    return req('/api/admin/media').then(function (r) { return r.json(); }).then(function (items) {
+      render(items || []);
+      showPanel();
+    }).catch(function (e) { if (e.auth) showLogin(); });
+  }
+
+  function render(items) {
+    countEl.textContent = items.length + ' item' + (items.length === 1 ? '' : 's');
+    grid.innerHTML = '';
+    items.forEach(function (it) {
+      var el = document.createElement('div');
+      el.className = 'item';
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      if (it.kind === 'video') {
+        var v = document.createElement('video');
+        v.src = it.url; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
+        thumb.appendChild(v);
+      } else {
+        var im = document.createElement('img');
+        im.src = it.url; im.loading = 'lazy'; im.alt = '';
+        thumb.appendChild(im);
+      }
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var name = document.createElement('div');
+      name.className = 'name'; name.textContent = it.file;
+      var sub = document.createElement('div');
+      sub.textContent = fmtBytes(it.size) + ' · ' + fmtDate(it.uploaded_at);
+      var row = document.createElement('div');
+      row.className = 'row';
+      var del = document.createElement('button');
+      del.className = 'ghost'; del.textContent = 'Delete';
+      del.addEventListener('click', function () {
+        if (!confirm('Delete "' + it.file + '"?')) return;
+        req('/api/admin/media/' + it.id, { method: 'DELETE' }).then(function () {
+          statusEl.textContent = 'Deleted ' + it.file;
+          load();
+        }).catch(function () { statusEl.textContent = 'Delete failed.'; });
+      });
+      row.appendChild(del);
+      meta.appendChild(name); meta.appendChild(sub); meta.appendChild(row);
+      el.appendChild(thumb); el.appendChild(meta);
+      grid.appendChild(el);
+    });
+  }
+
+  function uploadFile(file) {
+    var fd = new FormData();
+    fd.append('file', file, file.name);
+    statusEl.textContent = 'Uploading ' + file.name + ' …';
+    return req('/api/upload', { method: 'POST', body: fd }).then(function (r) {
+      return r.json();
+    }).then(function (saved) {
+      statusEl.textContent = 'Saved ' + saved.file + ' (' + fmtBytes(saved.size) + ')';
+    });
+  }
+
+  function uploadFiles(files) {
+    if (!files || !files.length) return;
+    var chain = Promise.resolve();
+    for (var i = 0; i < files.length; i++) {
+      (function (f) { chain = chain.then(function () { return uploadFile(f); }); })(files[i]);
+    }
+    chain.then(load).catch(function () { statusEl.textContent = 'Upload failed — file too large or invalid type.'; });
+  }
+
+  drop.addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () { uploadFiles(fileInput.files); fileInput.value = ''; });
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); });
+  });
+  drop.addEventListener('drop', function (e) { uploadFiles(e.dataTransfer.files); });
+
+  load();
+})();
+</script>
+</body>
+</html>
