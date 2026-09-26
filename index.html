@@ -366,7 +366,8 @@
   <script src="/script.js?v=4"></script>
   <script>
   /* Homepage gallery preview — shows the first few photos from the backend.
-     Falls back to /assets/gallery/gallery.json, then local /api/gallery.
+     Falls back to the local preview server's /api/gallery when the Worker is
+     unreachable, so local development (node server.mjs) still works.
      Set API to your deployed Worker URL (see backend/BACKEND-SETUP.md). */
   var API = 'https://royalinn-gallery.royalinn-palpa.workers.dev';
   (function () {
@@ -379,7 +380,7 @@
       lb.classList.add('is-open');
     }
     function grab(u){ return fetch(u).then(function (r) { return r.ok ? r.json() : Promise.reject(); }); }
-    grab(API + '/api/gallery').catch(function () { return grab('/assets/gallery/gallery.json'); }).catch(function () { return grab('/api/gallery'); }).then(function (files) {
+    grab(API + '/api/gallery').catch(function () { return grab('/api/gallery'); }).then(function (files) {
       (files || []).slice(0, 6).forEach(function (f) {
         var isVid = /\.(mp4|webm|mov)$/i.test(f);
         var a = document.createElement('a'); a.href = f; a.setAttribute('data-lightbox', f); a.setAttribute('data-type', isVid ? 'video' : 'image');

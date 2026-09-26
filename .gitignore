@@ -10,3 +10,7 @@ _*.png
 
 # temp seed insert file (backend/seed.mjs)
 .seed-inserts.sql
+
+# wrangler local state (build cache + account id)
+.wrangler/
+

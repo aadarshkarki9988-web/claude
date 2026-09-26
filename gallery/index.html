@@ -124,8 +124,8 @@
   <script src="/script.js?v=4"></script>
   <script>
   /* Gallery loads from the Cloudflare backend (/api/gallery). If the backend is
-     unreachable it falls back to /assets/gallery/gallery.json, then to the local
-     preview server's /api/gallery — so local development still works.
+     unreachable it falls back to the local preview server's /api/gallery — so
+     local development still works.
      Set API to your deployed Worker URL (see backend/BACKEND-SETUP.md). */
   var API = 'https://royalinn-gallery.royalinn-palpa.workers.dev';
   (function () {
@@ -141,7 +141,7 @@
       lb.classList.add('is-open');
     }
     function grab(u){ return fetch(u).then(function (r) { return r.ok ? r.json() : Promise.reject(); }); }
-    grab(API + '/api/gallery').catch(function () { return grab('/assets/gallery/gallery.json'); }).catch(function () { return grab('/api/gallery'); }).then(function (files) {
+    grab(API + '/api/gallery').catch(function () { return grab('/api/gallery'); }).then(function (files) {
       if (!files || !files.length) { if (empty) empty.hidden = false; return; }
       files.forEach(function (f) {
         var isVid = /\.(mp4|webm|mov)$/i.test(f);

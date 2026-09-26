@@ -97,33 +97,33 @@ royalinn-site\
     img\                <- Photos used across the site
     video\              <- Videos / reels (.mp4)
     menu\               <- The little dish photos + section logos on the menu
-    gallery\            <- Gallery photos  (see section 6 — special step)
+    gallery\            <- Gallery photos  (see section 6 — adding photos)
     brand\              <- The Royal Inn logo
     poster\             <- Still images shown before a video starts playing
 ```
 
 ---
 
-## 6. Special step for the GALLERY page
+## 6. Adding photos & videos to the GALLERY
 
-The gallery reads a list file called **`assets\gallery\gallery.json`**.
-When you **add or remove** a gallery photo, that list must be rebuilt so the new
-photo appears. Two ways:
+Gallery photos and videos are **not** files you add to this folder any more. They
+live in Cloudflare D1 + Supabase Storage and are served from the Worker, so there
+is **no `gallery.json` and no `rebuild-gallery.bat`** — nothing to rebuild and no
+HTML to edit.
 
-**Easiest:** double-click **`rebuild-gallery.bat`** (in the `royalinn-site`
-folder). It updates the list automatically. Then publish again.
-*(This needs Node.js installed — it already is on the computer we built this on.
-Get it free at https://nodejs.org if you're on a new computer.)*
+**To add or remove a photo/video:** open the admin panel and use it.
 
-**Or by hand:** open `assets\gallery\gallery.json` in Notepad. It's a list like:
-```
-["/assets/gallery/01.jpg","/assets/gallery/02.jpg", ... ]
-```
-Add your new file the same way, e.g. add `,"/assets/gallery/25.jpg"` before the
-closing `]`. Save, then publish.
+1. Deploy the backend once (see `backend/BACKEND-SETUP.md`).
+2. Open `https://<your-worker>.workers.dev/admin` and sign in.
+3. Drag the file onto the drop zone (or click to browse), then **Save**.
 
-> Photos used on the **Home** and **Menu** pages are NOT affected by this — only
-> the Gallery page needs this list.
+The item appears on the Home and Gallery pages within seconds. Deleting it in the
+admin panel removes it everywhere.
+
+Limits: **48 MB per file**, types `.jpg .jpeg .png .webp .gif .mp4 .webm .mov`.
+
+> The static `assets/gallery/` photos still exist and are used as the site's own
+> artwork. They are no longer what drives the Gallery page.
 
 ---
 
