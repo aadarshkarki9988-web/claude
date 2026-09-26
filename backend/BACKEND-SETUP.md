@@ -38,6 +38,10 @@ npx wrangler d1 create royalinn-gallery-db
 # 3) apply the database table
 npx wrangler d1 execute royalinn-gallery-db --remote --file schema.sql
 ```
+`schema.sql` is **re-runnable** — it creates the media tables **and the menu
+tables** (`menu_sections`, `menu_items`). If you already ran it before the menu
+feature existed, just run the command again (adds/recreates the menu tables;
+existing gallery data is untouched).
 
 ### B. Supabase part (browser — FREE, no card)
 1. Go to **supabase.com** → **Start your project** → sign up (email) or log in.
@@ -89,16 +93,17 @@ You should see all 24 files upload then 24 rows inserted.
 
 ## 3. Point the website at the backend
 
-In two files replace the API placeholder with your Worker URL from step C.8:
+In three files replace the API placeholder with your Worker URL from step C.8:
 - `gallery/index.html`
 - `index.html`
+- `menu/index.html`
 
 ```js
 var API = 'https://royalinn-gallery.<your-subdomain>.workers.dev';
 ```
 
-The gallery keeps a fallback chain (Worker → `gallery.json` → local `/api/gallery`),
-so local `node server.mjs` preview still works untouched.
+The gallery and menu pages keep a fallback chain (Worker → static files), so
+local `node server.mjs` preview still works untouched.
 
 Then **re-publish the site to Netlify** as usual.
 
@@ -107,11 +112,20 @@ Then **re-publish the site to Netlify** as usual.
 ## 4. Daily use (no developer needed)
 
 1. Open `https://<your-worker-url>/admin` and log in.
-2. Drag photos/videos into the drop zone (multiple; each file up to **50 MB**).
-3. They appear on the Gallery page within seconds.
-4. Delete from the admin panel any time.
+2. **Gallery tab** — drag photos/videos into the drop zone (multiple; each file
+   up to **50 MB**). They appear on the Gallery page within seconds. Delete from
+   the admin panel any time.
+3. **Menu tab** — full menu editor:
+   - **+ Add menu section** creates a heading (e.g. "Soup"). Slug = the page
+     anchor, title, blurb, and an optional round logo image — **drag & drop**
+     it into the box (or click to browse); it uploads automatically.
+   - Inside each section: **+ Item** adds a dish (name, price, optional note,
+     tags like `Spicy,Popular`, and a **Matrix** tick for rows where the note
+     carries the prices instead of a separate price column, e.g. Mo:Mo).
+   - **Edit / Delete** on every section and item. Saving updates the public
+     Menu page within ~5 minutes (backend caches it for 5 min).
 
-No `gallery.json`, no `rebuild-gallery.bat`, no Claude round-trip.
+No `gallery.json`, no `rebuild-gallery.bat`, no editing HTML, no Claude round-trip.
 
 ---
 
@@ -119,7 +133,9 @@ No `gallery.json`, no `rebuild-gallery.bat`, no Claude round-trip.
 
 - **50 MB / file** — your photos (~1 MB) and reels (~8 MB) are far below this.
   If a phone video is larger, compress it first (the site already prefers
-  compressed reels).
+  compressed reels). Menu section logos upload at max **5 MB** (images only) and
+  live in the same **`gallery` bucket under a `logos/` prefix** — they never
+  appear in the Gallery because they aren't registered in the `media` table.
 - **1 GB storage** — ~100+ reels. Delete old items from the admin panel to free space.
 - **5 GB egress / month** — fine for a small-site gallery; heavy video traffic is
   the only thing that could approach it.
@@ -131,7 +147,7 @@ No `gallery.json`, no `rebuild-gallery.bat`, no Claude round-trip.
 ## 6. Files in `backend/`
 
 ```
-schema.sql            D1 table definition
+schema.sql            D1 table definitions (gallery media + menu)
 wrangler.toml         Worker config + D1 binding + SUPABASE vars
 worker/index.js       The backend API + embedded admin page (single deployable)
 admin.html            Source copy of the admin page (for readability)

@@ -41,7 +41,13 @@ const EXT_TYPE = {
 };
 
 function npx(args) {
-  execFileSync(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, { stdio: 'inherit' });
+  // Directly spawning .cmd (npx.cmd) throws EINVAL on Windows/Node 20+;
+  // go through cmd.exe instead.
+  if (process.platform === 'win32') {
+    execFileSync('cmd.exe', ['/c', 'npx'].concat(args), { stdio: 'inherit' });
+  } else {
+    execFileSync('npx', args, { stdio: 'inherit' });
+  }
 }
 
 async function upload(url, key, data, contentType) {
@@ -88,13 +94,16 @@ const rows = files.map((f) => {
   const size = statSync(join(GALLERY_DIR, f)).size;
   return `('${f}', '${kind}', '${mime}', ${size}, datetime('now'))`;
 });
-const sql = `INSERT INTO media (file_key, kind, mime, size, uploaded_at) VALUES ` + rows.join(',\n') + ';';
+const sql = `INSERT OR IGNORE INTO media (file_key, kind, mime, size, uploaded_at) VALUES ` + rows.join(',\n') + ';';
 const tmp = join(import.meta.dirname, '.seed-inserts.sql');
 writeFileSync(tmp, sql, 'utf8');
 
-console.log('\n[d1] inserting ' + files.length + ' row(s) into ' + DB);
-npx(['wrangler', 'd1', 'execute', DB, '--remote', '--file', tmp]);
-unlinkSync(tmp);
+try {
+  console.log('\n[d1] inserting ' + files.length + ' row(s) into ' + DB);
+  npx(['wrangler', 'd1', 'execute', DB, '--remote', '--file', tmp]);
+} finally {
+  try { unlinkSync(tmp); } catch (e) { /* already removed */ }
+}
 
 console.log('\nDone. Gallery registered ' + files.length + ' item(s).');
 console.log('Admin:  http://<your-worker>.workers.dev/admin');

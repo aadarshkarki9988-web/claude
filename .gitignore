@@ -7,3 +7,6 @@ desktop.ini
 # temp preview files
 _*.jpg
 _*.png
+
+# temp seed insert file (backend/seed.mjs)
+.seed-inserts.sql
