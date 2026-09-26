@@ -1,0 +1,17 @@
+# Vercel publishes the repo root, so exclude everything that is not the
+# public website. Without this, backend/ would be served publicly —
+# including backend/admin.html (a non-functional copy of the admin panel) and
+# backend/worker/index.js (the Worker source).
+#
+# Vercel already ignores .git, .gitignore, node_modules and similar on its own.
+
+backend/
+.claude/
+dist/
+
+# repo tooling and documentation
+HOW-TO-DEPLOY.md
+server.mjs
+build-site.mjs
+netlify.toml
+vercel.json

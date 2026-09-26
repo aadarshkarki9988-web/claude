@@ -14,3 +14,6 @@ _*.png
 # wrangler local state (build cache + account id)
 .wrangler/
 
+# staged website output (build-site.mjs / Netlify publish dir)
+dist/
+
