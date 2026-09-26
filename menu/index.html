@@ -62,7 +62,7 @@
       </div>
     </section>
 
-    <nav class="menu-nav" aria-label="Menu sections">
+    <nav class="menu-nav" id="menuNavList" aria-label="Menu sections">
       <a href="#specials">Specials</a>
       <a href="#combo">Combos</a>
       <a href="#soup">Soup</a>
@@ -79,7 +79,7 @@
     </nav>
 
     <div class="page-section">
-      <div class="container">
+      <div class="container" id="menuRoot">
 
         <section class="menu-section" id="specials">
           <div class="menu-section__head">
@@ -407,10 +407,91 @@
   <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}</style>
   <script src="/script.js?v=4"></script>
   <script>
+  /* The menu can be edited from the admin panel (Cloudflare backend). When the
+     backend is reachable and has menu data, this replaces the hardcoded
+     sections below with the live data. If the backend is unreachable or has no
+     menu yet, the static sections below remain as the fallback — so local
+     preview (node server.mjs) still works untouched.
+     Set API to your deployed Worker URL (see backend/BACKEND-SETUP.md). */
+  var API = 'https://royalinn-gallery.royalinn-palpa.workers.dev';
+  (function () {
+    var root = document.getElementById('menuRoot');
+    if (!root) return;
+    fetch(API + '/api/menu').then(function (r) {
+      if (!r.ok) throw new Error('bad response');
+      return r.json();
+    }).then(function (sections) {
+      if (!Array.isArray(sections) || !sections.length) return;
+      var nav = document.getElementById('menuNavList');
+      var note = root.querySelector('.menu-note');
+      var stale = Array.prototype.slice.call(root.querySelectorAll('.menu-section'));
+      function build(s) {
+        var sec = document.createElement('section');
+        sec.className = 'menu-section';
+        sec.id = s.slug;
+        var head = document.createElement('div');
+        head.className = 'menu-section__head';
+        if (s.img) {
+          var img = document.createElement('img');
+          img.className = 'menu-section__img';
+          img.src = s.img; img.alt = s.title;
+          head.appendChild(img);
+        }
+        var h = document.createElement('h2');
+        h.className = 'h-display'; h.textContent = s.title;
+        head.appendChild(h);
+        if (s.blurb) {
+          var p = document.createElement('p');
+          p.className = 'menu-section__blurb'; p.textContent = s.blurb;
+          head.appendChild(p);
+        }
+        sec.appendChild(head);
+        (s.items || []).forEach(function (it) {
+          var div = document.createElement('div');
+          div.className = 'menu-item' + (it.matrix ? ' menu-item--matrix' : '');
+          var name = document.createElement('div');
+          name.className = 'menu-item__name'; name.textContent = it.name;
+          (it.tags || []).forEach(function (t) {
+            var tg = document.createElement('span');
+            tg.className = 'menu-item__tag'; tg.textContent = t;
+            name.appendChild(tg);
+          });
+          div.appendChild(name);
+          if (it.note) {
+            var nt = document.createElement('div');
+            nt.className = 'menu-item__note'; nt.textContent = it.note;
+            div.appendChild(nt);
+          }
+          if (!it.matrix && it.price) {
+            var pr = document.createElement('div');
+            pr.className = 'menu-item__price'; pr.textContent = it.price;
+            div.appendChild(pr);
+          }
+          sec.appendChild(div);
+        });
+        return sec;
+      }
+      if (nav) {
+        nav.innerHTML = '';
+        sections.forEach(function (s) {
+          var a = document.createElement('a');
+          a.href = '#' + s.slug; a.textContent = s.title;
+          nav.appendChild(a);
+        });
+      }
+      sections.forEach(function (s) { root.insertBefore(build(s), note); });
+      stale.forEach(function (el) { el.remove(); });
+      if (window.applyDishPhotos) window.applyDishPhotos();
+    }).catch(function () {});
+  })();
+  </script>
+  <script>
   /* Per-item dish photos. Drop files in /assets/menu/<name>.jpg and they appear.
      Each item is mapped to a dish slug below. Until a file exists, a tasteful
-     placeholder box shows. See /assets/menu/README.txt for the full list. */
-  (function () {
+     placeholder box shows. See /assets/menu/README.txt for the full list.
+     Exposed as window.applyDishPhotos() so it can be re-run after the menu
+     re-renders from the backend. */
+  window.applyDishPhotos = function () {
     var MAP = {
       specials: { 'wings on fire':'wings-on-fire', 'pork dameko':'pork-dameko', 'pork tawa sekuwa':'pork-tawa-sekuwa', 'chicken tawa sekuwa':'chicken-tawa-sekuwa', 'one heat chicken sekuwa':'chicken-sekuwa' },
       combo: { 'veg. combo set':'veg-combo', 'non-veg. combo set':'nonveg-combo', 'mo:mo platter':'momo-platter' },
@@ -460,7 +541,8 @@
         item.classList.add('has-thumb');
       });
     });
-  })();
+  };
+  window.applyDishPhotos();
   </script>
 </body>
 </html>

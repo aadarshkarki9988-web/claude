@@ -1,0 +1,30 @@
+# Cloudflare Worker config for the Royal Inn gallery backend (NO-CARD stack).
+# Free for ever: Workers 100k req/day + D1 (SQLite) free plan on Cloudflare (no card),
+# and file storage on Supabase Storage free plan (no card, 1 GB, 50 MB/file).
+#
+# SETUP (one time):
+#   1. npx wrangler login
+#   2. npx wrangler d1 create royalinn-gallery-db   -> paste the printed database_id below
+#   3. Create a free Supabase project (no card).
+#      - Storage -> New bucket -> name: gallery -> Public
+#      - Project Settings -> API -> copy "Project URL" and "service_role" key
+#      - SUPABASE_URL here must end WITHOUT a trailing slash
+#   4. npx wrangler d1 execute royalinn-gallery-db --remote --file schema.sql
+#   5. npx wrangler secret put ADMIN_PASSWORD_HASH  (output of: node hash-password.mjs <password>)
+#   6. npx wrangler secret put SESSION_SECRET       (any long random string)
+#   7. npx wrangler secret put SUPABASE_SERVICE_KEY (the service_role key from step 3)
+#   8. npx wrangler deploy
+#   9. node seed.mjs   (backfill existing photos into Supabase + D1)
+
+name = "royalinn-gallery"
+main = "worker/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "royalinn-gallery-db"
+database_id = "7ac269be-2615-40b1-9984-b6db1f28854f"
+
+[vars]
+SUPABASE_URL = "https://eyuhxrndjqibzsaconfo.supabase.co"
+SUPABASE_BUCKET = "gallery"
