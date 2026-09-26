@@ -1,0 +1,13 @@
+# Netlify build/publish config.
+#
+# The website is the repo root, but the repo also contains the Cloudflare
+# Worker backend (backend/), which must never be served as public web files.
+# Netlify has no .vercelignore equivalent, so build-site.mjs stages an explicit
+# allowlist into dist/ and we publish that instead.
+#
+# See backend/BACKEND-SETUP.md for the Worker and HOW-TO-DEPLOY.md for the
+# overall publishing workflow.
+
+[build]
+  publish = "dist"
+  command = "node build-site.mjs"
