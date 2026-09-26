@@ -143,14 +143,23 @@ function storageBase(env) {
 }
 
 function storageHeaders(env) {
-  return { 'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY };
+  // Supabase's newer sb_secret_ keys are rejected with 401 "No API key found in
+  // request" unless they also travel in the apikey header; legacy service_role
+  // JWTs ignore the extra header, so sending both is safe for either key type.
+  const key = env.SUPABASE_SERVICE_KEY || '';
+  const headers = { 'Authorization': 'Bearer ' + key };
+  if (key) headers['apikey'] = key;
+  return headers;
 }
 
 async function supabasePut(env, key, buf, mime) {
   const headers = storageHeaders(env);
   headers['Content-Type'] = mime;
   const res = await fetch(storageBase(env) + '/' + key, { method: 'POST', headers, body: buf });
-  if (!res.ok) throw new Error('Supabase upload failed with status ' + res.status);
+  if (!res.ok) {
+    const detail = await res.text().catch(function () { return ''; });
+    throw new Error('Supabase upload failed (' + res.status + '): ' + detail.slice(0, 300));
+  }
 }
 
 async function supabaseDelete(env, key) {
@@ -190,17 +199,25 @@ async function upload(request, env) {
   const file = fd.get('file');
   if (!file || typeof file.size !== 'number') return json({ error: 'no file' }, { status: 400 });
   const name = String(file.name || '').split('/').pop().split('\\').pop();
-  if (!ALLOW.test(name)) return json({ error: 'unsupported type' }, { status: 415 });
+  if (!ALLOW.test(name)) return json({ error: 'unsupported type (allowed: jpg, jpeg, png, webp, gif, mp4, webm, mov)' }, { status: 415 });
   const ext = getExt(name);
   const mime = file.type || EXT_TYPE[ext] || 'application/octet-stream';
   const size = file.size;
-  if (size > MAX_BYTES) return json({ error: 'too large (max 85 MB)' }, { status: 413 });
+  if (size > MAX_BYTES) return json({ error: 'too large (max 48 MB)' }, { status: 413 });
   const buf = new Uint8Array(await file.arrayBuffer());
   const key = Date.now() + '-' + name.replace(/[^\w.\-]+/g, '_');
-  await supabasePut(env, key, buf, mime);
+  try {
+    await supabasePut(env, key, buf, mime);
+  } catch (e) {
+    return json({ error: String(e.message || e) }, { status: 502 });
+  }
   const kind = mime.startsWith('video/') ? 'video' : 'image';
-  await env.DB.prepare('INSERT INTO media (file_key, kind, mime, size) VALUES (?, ?, ?, ?)')
-    .bind(key, kind, mime, size).run();
+  try {
+    await env.DB.prepare('INSERT INTO media (file_key, kind, mime, size) VALUES (?, ?, ?, ?)')
+      .bind(key, kind, mime, size).run();
+  } catch (e) {
+    return json({ error: 'database error: ' + String(e.message || e) }, { status: 500 });
+  }
   return json({ file: name, key, url: API_PREFIX + key, size, kind });
 }
 
@@ -217,7 +234,11 @@ async function logoUpload(request, env) {
   if (file.size > LOGO_MAX_BYTES) return json({ error: 'too large (max 5 MB)' }, { status: 413 });
   const buf = new Uint8Array(await file.arrayBuffer());
   const key = 'logos/' + Date.now() + '-' + name.replace(/[^\w.\-]+/g, '_');
-  await supabasePut(env, key, buf, mime);
+  try {
+    await supabasePut(env, key, buf, mime);
+  } catch (e) {
+    return json({ error: String(e.message || e) }, { status: 502 });
+  }
   return json({ file: name, key, url: publicMediaUrl(env, key) });
 }
 
@@ -627,7 +648,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
   }
 
   function uploadSecLogo(file) {
-    if (!/\.(jpe?g|png|webp|gif)$/i.test(file.name)) { secLogoStatus.textContent = 'Images only (jpg, png, webp, gif).'; return; }
+    if (!/\\.(jpe?g|png|webp|gif)$/i.test(file.name)) { secLogoStatus.textContent = 'Images only (jpg, png, webp, gif).'; return; }
     if (file.size > 5 * 1024 * 1024) { secLogoStatus.textContent = 'Too large — max 5 MB.'; return; }
     var fd = new FormData();
     fd.append('file', file, file.name);
@@ -669,8 +690,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
   function req(url, opts) {
     return fetch(url, opts).then(function (r) {
       if (r.status === 401) throw { auth: true };
-      if (!r.ok) return r.json().then(function (j) { throw new Error((j && j.error) || ('HTTP ' + r.status)); });
-      return r;
+      if (r.ok) return r;
+      return r.text().then(function (t) {
+        var msg = null;
+        try { var j = JSON.parse(t); msg = j && j.error; } catch (e) { msg = null; }
+        throw new Error(msg || t || ('HTTP ' + r.status));
+      });
     });
   }
 
@@ -709,7 +734,10 @@ const ADMIN_HTML = `<!DOCTYPE html>
         menuData = res[1] || [];
         renderMenu();
         showPanel();
-      }).catch(function (e) { if (e && e.auth) showLogin(); });
+      }).catch(function (e) {
+        if (e && e.auth) showLogin();
+        else statusEl.textContent = 'Could not load — ' + ((e && e.message) || 'try again.');
+      });
   }
 
   // ---------- gallery ----------
@@ -754,7 +782,16 @@ const ADMIN_HTML = `<!DOCTYPE html>
     });
   }
 
+  var MAX_BYTES_UI = 48 * 1024 * 1024;
+  var ALLOW_UI = /\\.(jpg|jpeg|png|webp|gif|mp4|webm|mov)$/i;
+
   function uploadFile(file) {
+    if (!ALLOW_UI.test(file.name)) {
+      return Promise.reject(new Error('"' + file.name + '" is not a supported type (jpg, jpeg, png, webp, gif, mp4, webm, mov)'));
+    }
+    if (file.size > MAX_BYTES_UI) {
+      return Promise.reject(new Error('"' + file.name + '" is too large (' + fmtBytes(file.size) + ', max 48 MB)'));
+    }
     var fd = new FormData();
     fd.append('file', file, file.name);
     statusEl.textContent = 'Uploading ' + file.name + ' …';
@@ -767,11 +804,21 @@ const ADMIN_HTML = `<!DOCTYPE html>
 
   function uploadFiles(files) {
     if (!files || !files.length) return;
+    var problems = [];
     var chain = Promise.resolve();
     for (var i = 0; i < files.length; i++) {
-      (function (f) { chain = chain.then(function () { return uploadFile(f); }); })(files[i]);
+      (function (f) {
+        chain = chain.then(function () {
+          return uploadFile(f).then(null, function (e) { problems.push((e && e.message) || 'unknown error'); });
+        });
+      })(files[i]);
     }
-    chain.then(loadAll).catch(function () { statusEl.textContent = 'Upload failed — file too large or invalid type.'; });
+    chain.then(function () { return loadAll(); })
+      .then(function () { if (problems.length) statusEl.textContent = 'Finished with errors — ' + problems.join('; '); })
+      .catch(function (e) {
+        if (e && e.auth) showLogin();
+        else statusEl.textContent = 'Upload failed — ' + ((e && e.message) || 'try again.');
+      });
   }
 
   drop.addEventListener('click', function () { fileInput.click(); });

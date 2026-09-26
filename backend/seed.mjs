@@ -53,13 +53,25 @@ function npx(args) {
 async function upload(url, key, data, contentType) {
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + SERVICE_KEY, 'Content-Type': contentType, 'x-upsert': 'true' },
+    headers: {
+      'Authorization': 'Bearer ' + SERVICE_KEY,
+      // Newer sb_secret_ keys are rejected with 401 "No API key found in request"
+      // unless they are also sent as apikey; legacy service_role JWTs ignore it.
+      'apikey': SERVICE_KEY,
+      'Content-Type': contentType,
+      'x-upsert': 'true'
+    },
     body: data
   });
   if (!res.ok) {
+    const detail = await res.text().catch(function () { return ''; });
     console.error('  upload failed (' + res.status + ' ' + res.statusText + '): ' + key);
+    console.error('  -> ' + detail.slice(0, 300));
+    if (res.status === 401) {
+      console.error('  -> Key rejected. Copy the CURRENT secret key from Supabase (Project Settings -> API).');
+    }
     if (res.status === 400) {
-      console.error('  -> Check SUPABASE_URL / service key / that bucket "' + BUCKET + '" exists and is public.');
+      console.error('  -> Check SUPABASE_URL / that bucket "' + BUCKET + '" exists.');
     }
     process.exit(1);
   }
